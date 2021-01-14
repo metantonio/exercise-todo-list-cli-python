@@ -1,24 +1,31 @@
 from base64 import b64encode
-import os
-import sys
-
-#reload(sys).setdefaultencoding("ISO-8859-1")
+import os, json
 
 class Base():
-    self.id= b64encode(os.urandom(32).decode('utf-8'))
+
+    def __init__(self):
+        self.id = b64encode(os.urandom(32)).decode("utf-8")
 
 class UserList(Base):
-
+    
     def __init__(self, name):
         super().__init__()
-        self.name=name
+        self.name = name
 
-    def create():
-        pass
+    @classmethod
+    def create(cls):
+        """ 
+            pide el nombre del usuario, al usuario,
+            y con este nombre crea una instancia de
+            UserList y la devuelve.
+        """
+        name = input("¿cuál es el nombre del usuario?\n")
+        new_user = cls(name)
+        return new_user        
 
     def add_task():
         pass
-
+    
     def complete_task():
         pass
 
@@ -31,50 +38,64 @@ class UserList(Base):
     def delete():
         pass
 
-    def serialize():
+    def serialize(self):
         return {
             "id": self.id,
-            "name":self.name,
+            "name": self.name,
         }
 
 class Task(Base):
 
     def __init__(self, label, user_list_id):
         super().__init__()
-        self.label=label
-        self.done=False
-        self.result=None
-        self.user_list_id=user_list_id
-    
+        self.label = label
+        self.done = False
+        self.result = None
+        self.user_list_id = user_list_id
+
     def serialize(self):
-        return{
-            "id":self.id,
-            "user_list_id":self.user_list_id,
-            "label":self.label,
-            "done":self.done,
-            "result":self.result if self.result is not None else ""
+        return {
+            "id": self.id,
+            "user_list_id": self.user_list_id,
+            "label": self.label,
+            "done": self.done,
+            "result": self.result if self.result is not None else ""
         }
-    
-def load_user():
-    """ carga todos los diccionarios del archivo users_lists.json
-    y crea instancias de UserList con estos diccionarios
+
+def load_users():
     """ 
-    if os.path.isfile(os.path.join(os,getcwd(), "user_list.json")):
-        #existe, abrimos el archivo
-        users_list_dictionaries = []
-        with open(os.path.join(os.getcwd(), "user_list.json"), "r") as users_file:
-            user_list_dictionaries = json.load(user_file)
-        for dictionay in user_list_dictionaries:
-            new_user = UserList(dictionary["Name"])
+        carga todos los diccionarios del archivo 
+        users_lists.json y crea instancias de UserList
+        con estos diccionarios y devuelve una lista
+        con estos objetos users_lists.
+    """
+    users = []
+    if os.path.isfile(os.path.join(os.getcwd(), "users_lists.json")):
+        # existe, abrimos el archivo
+        users_lists_dictionaries = []
+        with open(os.path.join(os.getcwd(), "users_lists.json"), "r") as users_file:
+            users_lists_dictionaries = json.load(users_file)
+        for dictionary in users_lists_dictionaries:
+            new_user = UserList(dictionary["name"])
             new_user.id = dictionary["id"]
             users.append(new_user)
-        return users  
+        return users
     else:
-        return users   
+        # no existe, return None
+        return users
 
-# new_user=UserList("metantonio")
-# print(new_user.serialize())
-# new_task = Task("hacer cfe", new_user.id)
-# print(new_task.serialize)
-users = load_user()
-orint([user.serialize() for user in users])
+def create_user():
+    return UserList.create()
+
+def save_users(users):
+    """
+        abre/crea el archivo users_lists.json y guarda
+        la lista de diccionarios que representan a los
+        usuarios.
+    """
+    with open(os.path.join(os.getcwd(), "users_lists.json"), "w") as users_file:
+        users_as_dictionaries = []
+        for user in users:
+            users_as_dictionaries.append(user.serialize())
+        json.dump(users_as_dictionaries, users_file)
+         
